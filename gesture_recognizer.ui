@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>GestureRecognizer</class>
+ <widget class="QWidget" name="GestureRecognizer">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>1078</width>
+    <height>694</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Gesture Recognizer</string>
+  </property>
+  <widget class="QLabel" name="title">
+   <property name="geometry">
+    <rect>
+     <x>710</x>
+     <y>10</y>
+     <width>181</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt; font-weight:600;&quot;&gt;Gesture Recognizer&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="mode_label">
+   <property name="geometry">
+    <rect>
+     <x>600</x>
+     <y>210</y>
+     <width>151</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Select a mode:</string>
+   </property>
+  </widget>
+  <widget class="QComboBox" name="mode_selection">
+   <property name="geometry">
+    <rect>
+     <x>750</x>
+     <y>210</y>
+     <width>87</width>
+     <height>32</height>
+    </rect>
+   </property>
+   <item>
+    <property name="text">
+     <string>Learn</string>
+    </property>
+   </item>
+   <item>
+    <property name="text">
+     <string>Predict</string>
+    </property>
+   </item>
+  </widget>
+  <widget class="QLabel" name="instruction">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>60</y>
+     <width>461</width>
+     <height>131</height>
+    </rect>
+   </property>
+   <property name="lineWidth">
+    <number>1</number>
+   </property>
+   <property name="text">
+    <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Based on the selected mode below you can draw a gesture on the canvas&lt;/p&gt;&lt;p&gt;at the left and save it (&amp;quot;learn mode&amp;quot;) or you can draw a gesture on the &lt;/p&gt;&lt;p&gt;canvas and let the algorithm predict which of the already saved gestures &lt;/p&gt;&lt;p&gt;you most probably have drawn (&amp;quot;predict&amp;quot;).&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+   <property name="wordWrap">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QFrame" name="learn_ui">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>300</y>
+     <width>481</width>
+     <height>311</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <widget class="QLineEdit" name="gesture_name_input">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>31</y>
+      <width>281</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="placeholderText">
+     <string>Enter the name of the gesture here</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_save">
+    <property name="geometry">
+     <rect>
+      <x>330</x>
+      <y>30</y>
+      <width>121</width>
+      <height>34</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(120, 206, 63);</string>
+    </property>
+    <property name="text">
+     <string>Save gesture</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QFrame" name="predict_ui">
+   <property name="geometry">
+    <rect>
+     <x>580</x>
+     <y>300</y>
+     <width>481</width>
+     <height>311</height>
+    </rect>
+   </property>
+   <property name="frameShape">
+    <enum>QFrame::StyledPanel</enum>
+   </property>
+   <property name="frameShadow">
+    <enum>QFrame::Plain</enum>
+   </property>
+   <widget class="QLabel" name="predict_label">
+    <property name="geometry">
+     <rect>
+      <x>80</x>
+      <y>160</y>
+      <width>81</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Prediction:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_predict">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>70</y>
+      <width>121</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(120, 206, 63);</string>
+    </property>
+    <property name="text">
+     <string>Predict gesture</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="prediction_result">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>160</y>
+      <width>251</width>
+      <height>30</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>No gesture found!</string>
+    </property>
+   </widget>
+  </widget>
+  <widget class="QLabel" name="error_label">
+   <property name="geometry">
+    <rect>
+     <x>590</x>
+     <y>627</y>
+     <width>461</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">color: rgb(176, 0, 0);</string>
+   </property>
+   <property name="text">
+    <string/>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+  </widget>
+  <widget class="QDrawWidget" name="draw_widget" native="true">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>29</y>
+     <width>551</width>
+     <height>631</height>
+    </rect>
+   </property>
+  </widget>
+  <zorder>learn_ui</zorder>
+  <zorder>title</zorder>
+  <zorder>mode_label</zorder>
+  <zorder>mode_selection</zorder>
+  <zorder>instruction</zorder>
+  <zorder>predict_ui</zorder>
+  <zorder>error_label</zorder>
+  <zorder>draw_widget</zorder>
+ </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QDrawWidget</class>
+   <extends>QWidget</extends>
+   <header>QDrawWidget</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
+ <resources/>
+ <connections/>
+</ui>
