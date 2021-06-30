@@ -6,7 +6,7 @@ import pathlib
 import sys
 import pandas as pd
 from enum import Enum
-from PyQt5 import QtWidgets, QtGui, uic, QtCore
+from PyQt5 import QtWidgets, uic, QtCore
 from dollar_one_recognizer import DollarOneRecognizer
 
 
@@ -47,16 +47,19 @@ class GestureRecognizer(QtWidgets.QWidget):
 
     def _save_to_file(self, gesture_name):
         current_points = self.ui.draw_widget.get_current_points()
+        # normalize gesture before saving so it doesn't have to be done everytime again when trying to predict sth
+        normalized_gesture = self.custom_filter(current_points)
+
         # TODO for now if a gesture already exists, it is simply replaced with the new one -> ask user if he wants that
         if gesture_name in self.existing_gestures['gesture_name'].unique():
             # replace the existing data for this gesture_name with the new data
-            # current_points needs to be wrapped into a list otherwise replacing the np.array directly would lead to a
-            # crash: "ValueError: cannot copy sequence with size ... to array axis with dimension 1"
+            # normalized_gesture needs to be wrapped into a list otherwise replacing the np.array directly would lead
+            # to a crash: "ValueError: cannot copy sequence with size ... to array axis with dimension 1"
             self.existing_gestures.loc[self.existing_gestures['gesture_name'] == gesture_name,
-                                       "gesture_data"] = [current_points]
+                                       "gesture_data"] = [normalized_gesture]
         else:
             # save the new points as list instead of a numpy array for the same reason as above
-            new_gesture = {'gesture_name': gesture_name, 'gesture_data': [current_points]}
+            new_gesture = {'gesture_name': gesture_name, 'gesture_data': [normalized_gesture]}
             self.existing_gestures = self.existing_gestures.append(new_gesture, ignore_index=True)
 
         self.existing_gestures.to_csv(self.__log_file_path, sep=";", index=False)
@@ -132,9 +135,8 @@ class GestureRecognizer(QtWidgets.QWidget):
         self.ui.error_label.setText("")  # hide error label
         gesture_name = self.ui.gesture_name_input.text()
 
-        # TODO normalize gesture before saving so it doesn't have to be done everytime when trying to predict sth
-
         self._save_to_file(gesture_name)
+        self.ui.gesture_name_input.clear()  # reset the name input field
         self._reset_canvas()  # reset the current gesture data on the canvas!
 
     def _reset_learn_ui(self):
@@ -158,12 +160,9 @@ class GestureRecognizer(QtWidgets.QWidget):
         drawn_gesture = self.ui.draw_widget.get_current_points()
         normalized_gesture = self.custom_filter(drawn_gesture)
 
-        normalized_templates = []
-        for template in self.existing_gestures["gesture_data"]:
-            # we actually have a nested list as we wrapped in another list when saving to be able to replace it easily
-            actual_template = template[0]
-            normalized_template = self.custom_filter(actual_template)
-            normalized_templates.append(normalized_template)
+        # we actually have a nested list as we wrapped in another list when saving to be able to replace it easily
+        # so we have to unpack the templates first
+        normalized_templates = [template[0] for template in self.existing_gestures["gesture_data"]]
 
         recognition_result = self.dollar_one_recognizer.recognize(points=normalized_gesture,
                                                                   templates=normalized_templates)

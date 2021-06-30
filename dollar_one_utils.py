@@ -1,3 +1,12 @@
+"""
+All functions below, unless otherwise noted, have been implemented based on the pseudocode in the original paper on the
+1$ recognizer:
+Wobbrock, J. O., Wilson, A. D., & Li, Y. (2007, October). Gestures without libraries, toolkits or training:
+a $1 recognizer for user interface prototypes. In Proceedings of the 20th annual ACM symposium on User
+interface software and technology (pp. 159-168).
+"""
+
+import sys
 import numpy as np
 
 
@@ -10,10 +19,11 @@ def calc_euclidean_distance(p1, p2):
     a = p2[0] - p1[0]
     b = p2[1] - p1[1]
     return np.sqrt(a**2 + b**2)
+    # alternatively: return np.linalg.norm(p1 - p2)
 
 
 def calc_path_length(points):
-    distance = 0
+    distance = 0.0
     for i in range(1, len(points)):
         last_point = points[i-1]
         current_point = points[i]
@@ -22,15 +32,24 @@ def calc_path_length(points):
     return distance
 
 
-def calc_centroid(points: np.ndarray):
-    # return np.mean(points, axis=0)
+def calc_path_distance(A, B):
+    if len(A) != len(B):
+        print("Error! Samples A and B are not equal in length!")
+        sys.exit(1)
 
-    # this is way faster: (taken from
-    # https://stackoverflow.com/questions/23020659/fastest-way-to-calculate-the-centroid-of-a-set-of-coordinate-tuples-in-python-wi)
-    length = points.shape[0]
-    sum_x = np.sum(points[:, 0])
-    sum_y = np.sum(points[:, 1])
-    return sum_x / length, sum_y / length
+    distance = 0
+    for i in range(1, len(A)):
+        distance += calc_euclidean_distance(A[i], B[i])
+
+    return distance / len(A)
+
+
+def calc_centroid(points: np.ndarray):
+    """
+    Function taken from the provided "Computational Geometry for Gesture Recognition" notebook.
+    """
+    xs, ys = zip(*points)
+    return (sum(xs) / len(xs), sum(ys) / len(ys))
 
 
 def rotate_by(points, angle):
@@ -46,7 +65,7 @@ def rotate_by(points, angle):
         rotated_point = [p_x, p_y]
         rotated_points.append(rotated_point)
 
-    return np.array(rotated_points)
+    return rotated_points
 
 
 def get_bounding_box(points):
@@ -54,20 +73,6 @@ def get_bounding_box(points):
     min_point = np.min(points, axis=0)
     max_point = np.max(points, axis=0)
     return [(min_point[0], min_point[1]), (max_point[0], max_point[1])]
-
-
-def get_norm(vector) -> float:
-    # return np.linalg.norm(vector)
-    return np.sqrt(vector[0]**2 + vector[1]**2)
-
-
-def calc_path_distance(A: np.ndarray, B: np.ndarray):
-    distance = 0
-    length_A = get_norm(A)
-    for i in range(1, len(A)):
-        distance += calc_euclidean_distance(A[i], B[i])
-
-    return distance / length_A
 
 
 def calc_dist_at_angle(points, template, angle):
