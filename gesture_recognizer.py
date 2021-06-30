@@ -7,6 +7,7 @@ import sys
 import pandas as pd
 from enum import Enum
 from PyQt5 import QtWidgets, uic, QtCore
+from PyQt5.QtWidgets import QMessageBox
 from dollar_one_recognizer import DollarOneRecognizer
 
 
@@ -18,8 +19,9 @@ class Mode(Enum):
 # noinspection PyAttributeOutsideInit
 class GestureRecognizer(QtWidgets.QWidget):
     """
-    Uses a 1$ gesture recognizer that tries to predict pre-defined gestures.
+    Uses a 1$ gesture recognizer to predict pre-defined gestures.
     """
+
     def __init__(self):
         super(GestureRecognizer, self).__init__()
         self.__log_folder = "existing_gestures"
@@ -50,17 +52,26 @@ class GestureRecognizer(QtWidgets.QWidget):
         # normalize gesture before saving so it doesn't have to be done everytime again when trying to predict sth
         normalized_gesture = self.custom_filter(current_points)
 
-        # TODO for now if a gesture already exists, it is simply replaced with the new one -> ask user if he wants that
         if gesture_name in self.existing_gestures['gesture_name'].unique():
-            # replace the existing data for this gesture_name with the new data
-            # normalized_gesture needs to be wrapped into a list otherwise replacing the np.array directly would lead
-            # to a crash: "ValueError: cannot copy sequence with size ... to array axis with dimension 1"
-            self.existing_gestures.loc[self.existing_gestures['gesture_name'] == gesture_name,
-                                       "gesture_data"] = [normalized_gesture]
+            # if the gesture already exists, ask the user if he wants to overwrite it
+            choice = QMessageBox.question(self, 'Overwrite gesture?',
+                                          "A gesture with this name already exists! Do you want to overwrite it?",
+                                          QMessageBox.Yes | QMessageBox.No)
+            if choice == QMessageBox.Yes:
+                # replace the existing data for this gesture_name with the new data
+                # normalized_gesture needs to be wrapped into a list otherwise replacing the np.array directly would
+                # lead to a crash: "ValueError: cannot copy sequence with size ... to array axis with dimension 1"
+                self.existing_gestures.loc[self.existing_gestures['gesture_name'] == gesture_name,
+                                           "gesture_data"] = [normalized_gesture]
+                self.ui.save_label.setText(f"Old content for gesture \"{gesture_name}\" was successfully overwritten!")
+            else:
+                return
+
         else:
             # save the new points as list instead of a numpy array for the same reason as above
             new_gesture = {'gesture_name': gesture_name, 'gesture_data': [normalized_gesture]}
             self.existing_gestures = self.existing_gestures.append(new_gesture, ignore_index=True)
+            self.ui.save_label.setText(f"Gesture \"{gesture_name}\" was successfully saved!")
 
         self.existing_gestures.to_csv(self.__log_file_path, sep=";", index=False)
 
@@ -128,7 +139,7 @@ class GestureRecognizer(QtWidgets.QWidget):
         if not self.ui.gesture_name_input.text():
             self.ui.error_label.setText("You have to enter a name for the drawn gesture to save it!")
             return
-        elif len(self.ui.draw_widget.get_current_points()) < 1:  # TODO at least 32 points?
+        elif len(self.ui.draw_widget.get_current_points()) < 1:
             self.ui.error_label.setText("You have to draw more to save this as a gesture!")
             return
 
@@ -140,7 +151,8 @@ class GestureRecognizer(QtWidgets.QWidget):
         self._reset_canvas()  # reset the current gesture data on the canvas!
 
     def _reset_learn_ui(self):
-        self.gesture_name_input.setText("")
+        self.ui.gesture_name_input.setText("")
+        self.ui.save_label.setText("")
         self._reset_canvas()
 
     def _reset_predict_ui(self):
@@ -152,7 +164,7 @@ class GestureRecognizer(QtWidgets.QWidget):
         self.ui.draw_widget.update()  # update the draw widget immediately so it will be redrawn without the points
 
     def _predict_gesture(self):
-        if len(self.ui.draw_widget.get_current_points()) < 1:  # TODO ?
+        if len(self.ui.draw_widget.get_current_points()) < 1:
             self.ui.error_label.setText("You have to draw a gesture on the canvas to predict it!")
             return
 
@@ -160,15 +172,13 @@ class GestureRecognizer(QtWidgets.QWidget):
         drawn_gesture = self.ui.draw_widget.get_current_points()
         normalized_gesture = self.custom_filter(drawn_gesture)
 
-        # we actually have a nested list as we wrapped in another list when saving to be able to replace it easily
-        # so we have to unpack the templates first
-        normalized_templates = [template[0] for template in self.existing_gestures["gesture_data"]]
-
-        recognition_result = self.dollar_one_recognizer.recognize(points=normalized_gesture,
-                                                                  templates=normalized_templates)
+        template_dict = dict(self.existing_gestures.values)
+        recognition_result = self.dollar_one_recognizer.recognize(normalized_gesture, template_dict)
         if recognition_result is not None:
-            best_template, similarity = recognition_result
-            print(f"Similarity result: {similarity}")
+            best_template, score = recognition_result
+            self.ui.prediction_result.setText(f"{best_template}   (score: {score})")
+        else:
+            self.ui.prediction_result.setText(f"Couldn't predict a gesture!")
 
 
 def main():

@@ -99,19 +99,26 @@ class DollarOneRecognizer:
         translated_points = self.translate_to_origin(scaled_points)
         return translated_points
 
-    def recognize(self, points, templates):
-        if len(templates) < 1:
+    def recognize(self, points, template_dict):
+        """
+        Slightly adapted from the pseudocode to work with a dictionary of templates and not just the point data.
+        """
+        if len(template_dict) < 1:
             print("There are no templates!")
             return
 
         T_new = None
         b = np.inf
-        for template in templates:
+        for template_name, template_data in template_dict.items():
+            # we actually have a nested list as we wrapped in another list when saving to be able to replace it easily
+            # so we have to unpack the templates first
+            normalized_template = template_data[0]
+
             # angle values based on the original paper from Wobbrock et al.:
-            dist = calc_dist_at_best_angle(points, template, -45, 45, 2)
+            dist = calc_dist_at_best_angle(points, normalized_template, -45, 45, 2)
             if dist < b:
                 b = dist
-                T_new = template
+                T_new = template_name
 
         if T_new is None:
             return
