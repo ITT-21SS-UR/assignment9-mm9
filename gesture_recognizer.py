@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import ast
 import pathlib
 import sys
 import pandas as pd
@@ -37,7 +38,9 @@ class GestureRecognizer(QtWidgets.QWidget):
         # check if the file already exists
         if self.__log_file_path.exists():
             # load existing gestures
-            self.existing_gestures = pd.read_csv(self.__log_file_path, sep=",")
+            self.existing_gestures = pd.read_csv(self.__log_file_path, sep=";")
+            # use a converter to convert saved list back to a list (by default it would be a string)
+            self.existing_gestures['gesture_data'] = self.existing_gestures['gesture_data'].apply(ast.literal_eval)
         else:
             # or create a new csv if it doesn't exist
             self.existing_gestures = pd.DataFrame(columns=['gesture_name', 'gesture_data'])
@@ -56,7 +59,7 @@ class GestureRecognizer(QtWidgets.QWidget):
             new_gesture = {'gesture_name': gesture_name, 'gesture_data': [current_points]}
             self.existing_gestures = self.existing_gestures.append(new_gesture, ignore_index=True)
 
-        self.existing_gestures.to_csv(self.__log_file_path, sep=",", index=False)
+        self.existing_gestures.to_csv(self.__log_file_path, sep=";", index=False)
 
     def _init_ui(self):
         self.ui = uic.loadUi("gesture_recognizer.ui", self)
@@ -102,20 +105,19 @@ class GestureRecognizer(QtWidgets.QWidget):
     def _show_predict_ui(self):
         self.ui.error_label.setText("")
         self._reset_predict_ui()
-        # TODO show which gestures were already recorded:
-        # existing_activities = self.existing_activity_data.activity.unique()
-        # self.predict_text_field.setHtml(f"Existing recorded activities: {existing_activities}")
+        # TODO show which gestures were already recorded to user as well (let him delete specific ones?)
+        known_gestures = self.existing_gestures.gesture_name.unique()
+        print(f"Existing gestures: {known_gestures}")
+
         self.ui.learn_ui.hide()
         self.ui.predict_ui.show()
 
     def custom_filter(self, points):
         return self.dollar_one_recognizer.normalize(points)
 
-    def transpose_points(self, points):
-        return list(map(list, zip(*points)))
-
     def _setup_draw_widget(self):
-        # set the draw widgets custom filter variable to the function of the same way which applies our transformation stack
+        # set the draw widgets custom filter variable to the function of the same way which applies our
+        # transformation stack
         self.ui.draw_widget.set_custom_filter(self.custom_filter)
 
     def _save_template(self):
@@ -129,6 +131,9 @@ class GestureRecognizer(QtWidgets.QWidget):
 
         self.ui.error_label.setText("")  # hide error label
         gesture_name = self.ui.gesture_name_input.text()
+
+        # TODO normalize gesture before saving so it doesn't have to be done everytime when trying to predict sth
+
         self._save_to_file(gesture_name)
         self._reset_canvas()  # reset the current gesture data on the canvas!
 
@@ -150,19 +155,21 @@ class GestureRecognizer(QtWidgets.QWidget):
             return
 
         self.ui.error_label.setText("")
-        """
-        # TODO call recognize for template and sample
-        if not len(self.ui.draw_widget.points) < 1:
-            # plot(self.transpose_points(dw.points)[0], self.transpose_points(dw.points)[1])
-            s1 = self.dollar_one_recognizer.normalize([(-1, 0), (0, -1), (1, 0), (0, 1)])
+        drawn_gesture = self.ui.draw_widget.get_current_points()
+        normalized_gesture = self.custom_filter(drawn_gesture)
 
-            sim = self.dollar_one_recognizer.recognize(s1, self.dollar_one_recognizer.normalize(dw.points))
-            print("similarity:", sim)
-        """
+        normalized_templates = []
+        for template in self.existing_gestures["gesture_data"]:
+            # we actually have a nested list as we wrapped in another list when saving to be able to replace it easily
+            actual_template = template[0]
+            normalized_template = self.custom_filter(actual_template)
+            normalized_templates.append(normalized_template)
 
-    def paintEvent(self, event: QtGui.QPaintEvent):
-        # TODO
-        pass
+        recognition_result = self.dollar_one_recognizer.recognize(points=normalized_gesture,
+                                                                  templates=normalized_templates)
+        if recognition_result is not None:
+            best_template, similarity = recognition_result
+            print(f"Similarity result: {similarity}")
 
 
 def main():
