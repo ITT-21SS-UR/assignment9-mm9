@@ -127,9 +127,10 @@ class GestureRecognizer(QtWidgets.QWidget):
     def _show_predict_ui(self):
         self.ui.error_label.setText("")
         self._reset_predict_ui()
-        # TODO show which gestures were already recorded to user as well (let him delete specific ones?)
+
+        # TODO let user delete specific ones
         known_gestures = self.existing_gestures.gesture_name.unique()
-        print(f"Existing gestures: {known_gestures}")
+        self.ui.existing_gestures_list.setText(f"{known_gestures}")
 
         self.ui.learn_ui.hide()
         self.ui.predict_ui.show()
@@ -184,7 +185,7 @@ class GestureRecognizer(QtWidgets.QWidget):
         recognition_result = self.dollar_one_recognizer.recognize(normalized_gesture, template_dict)
         if recognition_result is not None:
             best_template, score = recognition_result
-            self.ui.prediction_result.setText(f"{best_template}   (score: {score})")
+            self.ui.prediction_result.setText(f"{best_template}   (score: {score:.2f})")
         else:
             self.ui.prediction_result.setText(f"Couldn't predict a gesture!")
 

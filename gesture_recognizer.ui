@@ -176,8 +176,8 @@
    <widget class="QPushButton" name="btn_predict">
     <property name="geometry">
      <rect>
-      <x>140</x>
-      <y>160</y>
+      <x>30</x>
+      <y>180</y>
       <width>121</width>
       <height>41</height>
      </rect>
@@ -200,6 +200,38 @@
     </property>
     <property name="text">
      <string>No gesture found!</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="existing_gestures_list">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>50</y>
+      <width>421</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="alignment">
+     <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+    </property>
+    <property name="wordWrap">
+     <bool>true</bool>
+    </property>
+   </widget>
+   <widget class="QLabel" name="existing_gestures_label">
+    <property name="geometry">
+     <rect>
+      <x>40</x>
+      <y>7</y>
+      <width>131</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Existing Gestures:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
    </widget>
   </widget>
