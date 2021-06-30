@@ -1,6 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+"""
+3 example gestures that work quite well (others do as well):
+1) Z (drawn from top left as starting point)
+2) ✔ (a checkmark, starting from left; just make sure the left arrow part is smaller than the right one, otherwise
+     it could also be a 'V' for example)
+3) -> (an arrow, starting from left and drawing the upper half first)
+"""
+
 import ast
 import pathlib
 import sys

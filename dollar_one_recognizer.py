@@ -114,6 +114,10 @@ class DollarOneRecognizer:
             # so we have to unpack the templates first
             normalized_template = template_data[0]
 
+            if len(normalized_template) != len(points):
+                sys.stderr.write(f"Template {template_name} doesn't have the same size as the drawn gesture!")
+                continue
+
             # angle values based on the original paper from Wobbrock et al.:
             dist = calc_dist_at_best_angle(points, normalized_template, -45, 45, 2)
             if dist < b:
